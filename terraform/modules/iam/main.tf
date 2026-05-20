@@ -84,3 +84,47 @@ resource "aws_iam_role_policy_attachment" "glue_service_role" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
 
+# Rol para Step Functions
+resource "aws_iam_role" "sfn_role" {
+  name = "${var.project}-${var.env}-sfn-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "states.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "sfn_glue_policy" {
+  name = "${var.project}-${var.env}-sfn-glue-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "glue:StartJobRun",
+          "glue:GetJobRun",
+          "glue:GetJobRuns",
+          "glue:BatchStopJobRun"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "sfn_glue_attach" {
+  role       = aws_iam_role.sfn_role.name
+  policy_arn = aws_iam_policy.sfn_glue_policy.arn
+}
+
+
