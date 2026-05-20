@@ -54,7 +54,7 @@ jobs:
       - name: Upload Glue Script Great_Expectations
         if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Great_Expectations.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Great_Expectations.py
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/great_expectation.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Great_Expectations.py
 
       - name: Upload Glue Script bronze_to_silver
         if: github.ref == 'refs/heads/main'
