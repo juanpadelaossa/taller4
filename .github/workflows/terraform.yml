@@ -1,4 +1,4 @@
-name: Deploy Renault Data Lake
+name: Deploy Taller Data Lake
 
 on:
   push:
@@ -44,29 +44,24 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve -var-file="dev.tfvars"
 
-      # Subir Excels a Bronze (solo en main)
-      - name: Upload Excel 2024
+      # Subir CSV a Bronze (solo en main)
+      - name: Upload CSV extorsion
         if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/"Base de Datos Renault 2024.xlsx" s3://datalake-bronze-444655873165/Proyecto/
-
-      - name: Upload Excel 2025
-        if: github.ref == 'refs/heads/main'
-        run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/"Base de Datos Renault 2025.xlsx" s3://datalake-bronze-444655873165/Proyecto/
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/extorsion.csv s3://datalake-bronze-444655873165/taller/
 
       # Subir scripts Glue (solo en main)
+      - name: Upload Glue Script Great_Expectations
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Great_Expectations.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Great_Expectations.py
+
       - name: Upload Glue Script bronze_to_silver
         if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_bronze_to_silver.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_bronze_to_silver.py
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/bronze_to_silver.py s3://aws-glue-assets-444655873165-us-east-1/scripts/bronze_to_silver.py
 
       - name: Upload Glue Script silver_to_gold
         if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_silver_to_gold.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_silver_to_gold.py
-
-      - name: Upload Glue Script great_expectation
-        if: github.ref == 'refs/heads/main'
-        run: |
-          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_great_expectation.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_great_expectation.py
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/silver_to_gold.py s3://aws-glue-assets-444655873165-us-east-1/scripts/silver_to_gold.py

@@ -1,8 +1,8 @@
-project = "renault"
+project = "taller"
 env     = "dev"
 
 tags = {
-  Project = "renault"
+  Project = "taller"
   Env     = "dev"
   Owner   = "juan"
 }
