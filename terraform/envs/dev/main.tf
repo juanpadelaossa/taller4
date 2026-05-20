@@ -1,10 +1,10 @@
 terraform {
   backend "s3" {
-    bucket         = "datalake-terraform-state-444655873165"
-    key            = "dev/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-locks"
-    encrypt        = true
+    bucket       = "datalake-terraform-state-444655873165"
+    key          = "dev/renault/terraform.tfstate"
+    region       = "us-east-1"
+    use_lockfile = true
+    encrypt      = true
   }
 }
 
@@ -14,31 +14,17 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-module "bronze_bucket" {
-  source      = "../../modules/s3_lake"
-  project     = var.project
-  env         = var.env
-  bucket_name = "bronze"
-  account_id  = data.aws_caller_identity.current.account_id
-  tags        = var.tags
+# Referenciar buckets existentes
+data "aws_s3_bucket" "bronze" {
+  bucket = "datalake-bronze-444655873165"
 }
 
-module "silver_bucket" {
-  source      = "../../modules/s3_lake"
-  project     = var.project
-  env         = var.env
-  bucket_name = "silver"
-  account_id  = data.aws_caller_identity.current.account_id
-  tags        = var.tags
+data "aws_s3_bucket" "silver" {
+  bucket = "datalake-silver-444655873165"
 }
 
-module "gold_bucket" {
-  source      = "../../modules/s3_lake"
-  project     = var.project
-  env         = var.env
-  bucket_name = "gold"
-  account_id  = data.aws_caller_identity.current.account_id
-  tags        = var.tags
+data "aws_s3_bucket" "gold" {
+  bucket = "datalake-gold-444655873165"
 }
 
 module "glue_job" {
@@ -49,13 +35,9 @@ module "glue_job" {
 
   glue_role_arn = module.iam.glue_role_arn
 
-  bronze_bucket = module.bronze_bucket.bucket_name
-  silver_bucket = module.silver_bucket.bucket_name
-  temp_bucket   = module.bronze_bucket.bucket_name
-
-  script_location = "s3://${module.bronze_bucket.bucket_name}/scripts/etl_sales.py"
-
-
+  bronze_bucket = data.aws_s3_bucket.bronze.bucket
+  silver_bucket = data.aws_s3_bucket.silver.bucket
+  temp_bucket   = data.aws_s3_bucket.bronze.bucket
 
   tags = var.tags
 }
@@ -66,7 +48,8 @@ module "iam" {
   project = var.project
   env     = var.env
 
-  bronze_bucket = module.bronze_bucket.bucket_name
-  silver_bucket = module.silver_bucket.bucket_name
-  temp_bucket   = module.bronze_bucket.bucket_name
+  bronze_bucket = data.aws_s3_bucket.bronze.bucket
+  silver_bucket = data.aws_s3_bucket.silver.bucket
+  gold_bucket   = data.aws_s3_bucket.gold.bucket
+  temp_bucket   = data.aws_s3_bucket.bronze.bucket
 }

@@ -1,9 +1,10 @@
-name: Deploy Data Lake Terraform
+name: Deploy Renault Data Lake
 
 on:
   push:
     branches:
-      - feature/actions_back
+      - DEV
+      - main
 
 jobs:
   deploy:
@@ -11,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infra/terraform/envs/dev
+        working-directory: terraform/envs/dev
 
     steps:
       - name: Checkout repo
@@ -24,26 +25,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      # PYTHON
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      # DEPENDENCIAS
-      - name: Install dependencies
-        run: |
-          pip install pytest pyspark
-      
-      #Cambiar path
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/infra/terraform/archivos_para_bronze" >> $GITHUB_ENV
-
-      # RUN TESTS
-      - name: Run Tests
-        run: |
-          pytest $GITHUB_WORKSPACE/infra/terraform/archivos_para_bronze/tests/
 
       # Terraform
       - name: Setup Terraform
@@ -58,21 +39,34 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var-file="dev.tfvars"
 
+      # Solo en main se despliega
       - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve -var-file="dev.tfvars"
 
-      # Obtener outputs correctamente
-      - name: Get Terraform Outputs
-        id: outputs
+      # Subir Excels a Bronze (solo en main)
+      - name: Upload Excel 2024
+        if: github.ref == 'refs/heads/main'
         run: |
-          echo "BRONZE_BUCKET=$(terraform output -raw bronze_bucket_name)" >> $GITHUB_ENV
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/"Base de Datos Renault 2024.xlsx" s3://datalake-bronze-444655873165/Proyecto/
 
-      # Subir CSV
-      - name: Upload CSV
+      - name: Upload Excel 2025
+        if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp ../../archivos_para_bronze/sales_small.csv s3://$BRONZE_BUCKET/
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/"Base de Datos Renault 2025.xlsx" s3://datalake-bronze-444655873165/Proyecto/
 
-      # Subir script Glue
-      - name: Upload Glue Script
+      # Subir scripts Glue (solo en main)
+      - name: Upload Glue Script bronze_to_silver
+        if: github.ref == 'refs/heads/main'
         run: |
-          aws s3 cp ../../archivos_para_bronze/scripts/etl_sales.py s3://$BRONZE_BUCKET/scripts/etl_sales.py
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_bronze_to_silver.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_bronze_to_silver.py
+
+      - name: Upload Glue Script silver_to_gold
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_silver_to_gold.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_silver_to_gold.py
+
+      - name: Upload Glue Script great_expectation
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/Proyecto_great_expectation.py s3://aws-glue-assets-444655873165-us-east-1/scripts/Proyecto_great_expectation.py
