@@ -84,6 +84,3 @@ resource "aws_iam_role_policy_attachment" "glue_service_role" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
 
-output "glue_role_arn" {
-  value = aws_iam_role.glue_role.arn
-}
