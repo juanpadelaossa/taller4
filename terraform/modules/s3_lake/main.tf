@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "this" {
-  bucket = "${var.project}-${var.env}-${var.bucket_name}-${var.account_id}"
+  bucket = "datalake-${var.bucket_name}-${var.account_id}"
 
   tags = var.tags
 }

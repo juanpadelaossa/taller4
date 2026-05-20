@@ -14,6 +14,10 @@ variable "silver_bucket" {
   type = string
 }
 
+variable "gold_bucket" {
+  type = string
+}
+
 variable "temp_bucket" {
   type = string
 }
