@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket       = "datalake-terraform-state-444655873165"
-    key          = "dev/renault/terraform.tfstate"
+    key          = "dev/taller/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true
     encrypt      = true
