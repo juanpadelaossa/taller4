@@ -127,11 +127,4 @@ resource "aws_iam_role_policy_attachment" "sfn_glue_attach" {
   policy_arn = aws_iam_policy.sfn_glue_policy.arn
 }
 
-output "glue_role_arn" {
-  value = aws_iam_role.glue_role.arn
-}
-
-output "sfn_role_arn" {
-  value = aws_iam_role.sfn_role.arn
-}
 
