@@ -53,3 +53,10 @@ module "iam" {
   gold_bucket   = data.aws_s3_bucket.gold.bucket
   temp_bucket   = data.aws_s3_bucket.bronze.bucket
 }
+
+module "stepfunction" {
+  source = "../../modules/stepfunction"
+
+  sfn_role_arn = module.iam.sfn_role_arn
+  tags         = var.tags
+}
