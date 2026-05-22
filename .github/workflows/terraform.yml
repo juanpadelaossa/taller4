@@ -65,3 +65,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           aws s3 cp $GITHUB_WORKSPACE/terraform/archivos_para_bronze/scripts/silver_to_gold.py s3://aws-glue-assets-444655873165-us-east-1/scripts/silver_to_gold.py
+
+      # Ejecutar Step Function (solo en main)
+      - name: Start Step Function
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws stepfunctions start-execution \
+            --state-machine-arn "arn:aws:states:us-east-1:444655873165:stateMachine:ETL_Taller2"
